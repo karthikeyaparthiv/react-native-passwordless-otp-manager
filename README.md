@@ -1,5 +1,15 @@
 # Passwordless Authentication App (React Native + Expo)
 
+## Setup commands from scratch
+
+   ```bash
+   npx create-expo-app@latest passwordless-auth-app
+   ```
+
+   ```bash
+   npx expo install @react-native-async-storage/async-storage
+   ```
+
 ## Overview
 
 This project implements a passwordless authentication flow using:
@@ -238,3 +248,148 @@ I ensured:
 
 * Clear modular structure
 
+
+## Problem statement of this Assignment
+
+React Native Assignment
+
+Tech Stack
+
+● React Native (CLI or Expo)
+● TypeScript
+● Functional components only
+● Hooks (useState, useEffect, useMemo, useRef)
+● Any state management is allowed (no Redux required)
+
+Tooling Policy
+
+You may use GPT / Docs / StackOverflow.
+We will evaluate understanding, not speed.
+
+Problem Statement
+
+Build a passwordless authentication flow using Email + OTP, followed by a Session screen that tracks login duration.
+
+No backend is required - all logic can be implemented locally.
+
+Functional Requirements
+1️ Email + OTP Login
+
+● User enters email
+● Taps “Send OTP”
+● A 6-digit OTP is generated locally
+● User enters OTP to log in
+
+2️ OTP Rules (Important)
+
+● OTP length: 6 digits
+● OTP expiry: 60 seconds
+● Maximum attempts: 3
+● Generating a new OTP:
+    ○ Invalidates the old OTP
+    ○ Resets attempt count
+
+OTP must be stored per email, not globally.
+
+3 Session Screen
+
+After successful login:
+● Show session start time
+● Show live session duration (mm:ss)
+● Provide a Logout button
+
+Timer must:
+● Not reset on re-render
+● Stop correctly on logout
+● Clean up correctly when screen unmounts
+
+4️ External SDK Integration (Mandatory)
+
+Integrate one of the following:
+● Firebase Analytics
+● Sentry
+● React Native MMKV / AsyncStorage (with docs reading)
+● React Native NetInfo (for session logging)
+
+You must:
+● Read the SDK documentation
+● Initialize correctly
+● Log:
+    ○ OTP generated
+    ○ OTP validation success
+    ○ OTP validation failure
+    ○ Logout
+
+Technical Expectations
+React / React Native
+
+● Hooks usage (useEffect, useRef, useMemo)
+● Dependency arrays handled correctly
+● No memory leaks
+● No unnecessary re-renders
+
+Architecture
+
+● Clear separation:
+    ○ UI
+    ○ Business logic
+    ○ Side effects
+
+● No logic buried inside JSX
+
+Data Structures
+
+● Proper structure for OTP storage
+
+Suggested Project Structure (not mandatory)
+src/
+├── screens/
+│   ├── LoginScreen.tsx
+│   ├── OtpScreen.tsx
+│   ├── SessionScreen.tsx
+├── hooks/
+│   └── useSessionTimer.ts
+├── services/
+│   ├── otpManager.ts
+│   └── analytics.ts
+├── types/
+│   └── auth.ts
+
+Edge Cases to Handle
+
+● Expired OTP
+● Incorrect OTP
+● Exceeded OTP attempts
+● Resend OTP resets state
+● App background / foreground should not break session timer
+
+Documentation (Mandatory)
+
+Include a README.md explaining:
+
+OTP logic and expiry handling
+
+Data structures used and why
+
+Which external SDK you chose and why
+
+What GPT helped with vs what you understood and implemented
+
+What Not to Do
+
+● No global mutable variables
+● No setInterval leaks
+● No logic inside render blocks
+● No copy-pasted auth templates
+
+Bonus (Optional)
+
+● Visual countdown timer
+● Custom hook for OTP/session
+● Persist session using storage
+
+Submission
+
+● Share GitHub repository
+● App should run with minimal setup
+● Include setup steps in README
