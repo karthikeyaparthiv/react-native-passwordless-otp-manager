@@ -1,50 +1,240 @@
-# Welcome to your Expo app 👋
+# Passwordless Authentication App (React Native + Expo)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## Overview
 
-## Get started
+This project implements a passwordless authentication flow using:
 
-1. Install dependencies
+* Email + OTP login
+
+* Session tracking with live duration
+
+* AsyncStorage for local persistence
+
+* Clean separation of UI, business logic, and side effects
+
+* No backend is used — all logic is implemented locally.
+
+## Setup Instructions
+
+1. Clone the repository and change directory
+
+   ```bash
+   cd passwordless-auth-app
+   ```
+
+2. Install dependencies
 
    ```bash
    npm install
    ```
 
-2. Start the app
+3. Start the app
 
    ```bash
-   npx expo start
+   npx expo start -c
    ```
 
-In the output, you'll find options to open the app in a
+4. Run on device (Ensure that phone and laptop must be on same WiFi)
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+scan QR using Expo Go app after starting the app
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## OTP Logic & Expiry Handling
 
-## Get a fresh project
+*OTP Generation*
 
-When you're ready, run:
+When user taps Send OTP:
 
-```bash
-npm run reset-project
+* A 6-digit numeric OTP is generated locally
+
+* Expiry timestamp = Date.now() + 60 seconds
+
+* Attempts are reset to 3
+
+* OTP is stored per email in AsyncStorage
+
+*OTP Validation*
+
+On OTP submission:
+
+1. Check if OTP exists for email
+
+2. Check if attempts are exceeded
+
+3. Check if OTP is expired
+
+4. Compare entered OTP with stored OTP
+
+*Expiry Handling*
+
+* Expiry is stored as a timestamp (milliseconds)
+
+* Validation checks:
+
+```Date.now() > record.expiry```
+
+This ensures expiry works even if:
+
+* Countdown UI is manipulated
+
+* App goes to background
+
+* Device time changes
+
+*Resend OTP*
+
+When user taps *Resend OTP*:
+
+* Old OTP is overwritten
+
+* Attempts reset to 3
+
+* Expiry reset to 60 seconds
+
+## Data Structures Used & Why
+
+*OTP Record*
+
+```
+interface OtpRecord {
+  otp: string;
+  expiry: number;
+  attemptsLeft: number;
+}
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+*Why?*
 
-## Learn more
+* otp → stores generated code
 
-To learn more about developing your project with Expo, look at the following resources:
+* expiry → timestamp allows easy comparison
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+* attemptsLeft → tracks validation attempts
 
-## Join the community
+*OTP Storage Map*
 
-Join our community of developers creating universal apps.
+```type OtpStorageMap = Record<string, OtpRecord>;```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+Example:
+
+```
+{
+  "user1@email.com": {...},
+  "user2@email.com": {...}
+}
+```
+
+*Why?*
+
+* Ensures OTP is stored per email
+
+* Avoids global mutable variables
+
+* Easily scalable for multiple users
+
+## Session Handling
+
+On successful login:
+
+* Session start timestamp is stored in AsyncStorage
+
+* useSessionTimer calculates duration using:
+
+```Date.now() - startTimestamp```
+
+*Why This Approach?*
+
+* Timer does not reset on re-render
+
+* Survives app background/foreground
+
+* No memory leaks
+
+* Uses useRef to prevent duplicate intervals
+
+## External SDK Used
+
+*React Native AsyncStorage*
+
+*Why Chosen?*
+
+* Allows local persistence without backend
+
+* Lightweight and reliable
+
+* Suitable for storing:
+
+- OTP data
+
+- Session start timestamp
+
+*How It Is Used*
+
+* Wrapped inside storage.ts
+
+* No direct AsyncStorage calls inside UI
+
+* Centralized persistence layer
+
+This ensures clean architecture and easy maintainability.
+
+## Architecture & Separation of Concerns
+
+```
+app/                → Routing + Screens (UI only)
+src/services/       → Business logic + storage + logging
+src/hooks/          → Reusable session timer logic
+src/types/          → Type definitions
+src/constants/      → Config values
+```
+
+*Key Principles Followed*
+
+* No business logic inside JSX
+
+* No global mutable variables
+
+* No setInterval leaks
+
+* Clean dependency arrays
+
+* Side effects separated (logger.ts)
+
+* AsyncStorage wrapped in service layer
+
+## What I Understood and Implemented
+
+* Through this assignment, I demonstrated understanding of:
+
+* File-based routing using Expo Router
+
+* TypeScript type modeling for authentication flows
+
+* Designing OTP systems with expiry and attempt tracking
+
+* Avoiding global state by using AsyncStorage properly
+
+* Implementing session timers without memory leaks
+
+* Using useRef, useEffect, and useCallback correctly
+
+* Handling app background/foreground transitions
+
+* Maintaining clean separation between:
+
+- UI
+
+- Business logic
+
+- Side effects
+
+I ensured:
+
+* No logic buried inside render blocks
+
+* No unnecessary re-renders
+
+* Proper cleanup of intervals
+
+* Clear modular structure
+

@@ -1,0 +1,9 @@
+export const OTP_LENGTH = 6;
+export const OTP_EXPIRY_SECONDS = 60;
+export const OTP_EXPIRY_MILLISECONDS = OTP_EXPIRY_SECONDS * 1000;
+export const MAX_OTP_ATTEMPTS = 3;
+
+export const STORAGE_KEYS = {
+  OTP_STORE: "OTP_STORE",
+  SESSION_START: "SESSION_START",
+};
